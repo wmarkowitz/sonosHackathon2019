@@ -1,0 +1,36 @@
+curl -X GET \
+  https://api.ws.sonos.com/control/api/v1/households \
+  -H 'Authorization: Bearer (access token)' (access token) \
+  -H 'Cache-Control: no-cache' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'Host: api.ws.sonos.com' \
+  -H 'Postman-Token: 0e18650e-28e8-40e7-90b5-e1c77df083eb' \
+  -H 'X-Sonos-Api-Key: (api key)'
+
+curl -X GET \
+  https://api.ws.sonos.com/control/api/v1/households/(householdId)/groups \
+  -H 'Authorization: Bearer (access token)' \
+  -H 'Cache-Control: no-cache' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'Host: api.ws.sonos.com' \
+  -H 'Postman-Token: 549bc320-1343-4231-bae5-a3a8755990c4' \
+  -H 'X-Sonos-Api-Key: (api key)'
+
+curl -X POST \
+  https://api.ws.sonos.com/control/api/v1/groups/RINCON_7828CA16B94C01400:128145571/playback:1/play \
+  -H 'Authorization: Bearer (access token)' \
+  -H 'Cache-Control: no-cache' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'Host: api.ws.sonos.com' \
+  -H 'Postman-Token: 0234b949-37e5-43af-942c-3f158a4c8e56' \
+  -H 'X-Sonos-Api-Key: (api key)'
+
+curl -X POST \
+  https://api.ws.sonos.com/control/api/v1/players/RINCON_7828CA16B94C01400/playerVolume \
+  -H 'Authorization: Bearer (access token)' \
+  -H 'Cache-Control: no-cache' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'Host: api.ws.sonos.com' \
+  -H 'Postman-Token: ecd952cb-13dc-4b2f-bc7a-486d6b80339d' \
+  -H 'X-Sonos-Api-Key: (api key)'
+  -d volume=10
