@@ -91,6 +91,51 @@ bool setVolume(int volume) {
   );
 }
 
+bool httpGet(String url, const uint8_t fingerprint[20], header_t header_list[], int n_headers) {
+  Serial.print("[HTTPS] Initialize...\n");
+  
+  std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
+  client->setFingerprint(fingerprint);
+  HTTPClient https;
+
+  Serial.print("[HTTPS] Begin " + url + "...\n");
+  if (https.begin(*client, url)) {
+
+    Serial.print("[HTTPS] Set headers...\n");
+    for(int i = 0; i < n_headers; i++) {
+      Serial.println("[HTTPS] - " + header_list[i].header_name + ": " + header_list[i].header_value);
+      https.addHeader(header_list[i].header_name, header_list[i].header_value, false, false);
+    }
+
+    Serial.print("[HTTPS] GET...\n");
+    // start connection and send HTTP header
+    int httpCode = https.GET();
+
+    // httpCode will be negative on error
+    if (httpCode > 0) {
+      // HTTP header has been send and Server response header has been handled
+      Serial.printf("[HTTPS] GET: Success: %d\n", httpCode);
+
+      // file found at server
+      if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+        String payload = https.getString();
+        Serial.println("[HTTPS] Response: \n" + payload + "\n");
+        Serial.println("[HTTPS] End Response.");
+
+        return true;
+      }
+    } else {
+      Serial.printf("[HTTPS] GET: Failed. Error: %s\n", https.errorToString(httpCode).c_str());
+    }
+
+    https.end();
+  } else {
+    Serial.printf("[HTTPS] Unable to connect\n");
+  }
+
+  return false;
+}
+
 bool httpPost(String url, const uint8_t fingerprint[20], header_t header_list[], int n_headers, String data) {
   Serial.print("[HTTPS] Initialize...\n");
   
