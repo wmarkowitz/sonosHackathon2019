@@ -1,7 +1,8 @@
 import requests
 import json
+import asyncio
 
-def lowerVolume():
+async def lowerVolume():
     url = "https://api.ws.sonos.com/control/api/v1/players/RINCON_7828CAF4D45E01400/playerVolume"
 
     payload = {"volume": 5}
@@ -18,8 +19,9 @@ def lowerVolume():
     response = requests.request("POST", url, data=body, headers=headers)
 
     print(response.text)
+    return(response.text)
 
-def raiseVolume():
+async def raiseVolume():
     url = "https://api.ws.sonos.com/control/api/v1/players/RINCON_7828CAE736E601400/playerVolume"
 
     payload = {"volume": 70}
@@ -32,10 +34,17 @@ def raiseVolume():
         'Cache-Control': "no-cache",
         'Postman-Token': "e19dae15-21d0-499f-94e5-559953e6bb31"
         }
-
     response = requests.request("POST", url, data=body, headers=headers)
-
     print(response.text)
+    return(response.text)
 
-lowerVolume()
-raiseVolume()
+async def main():
+    # await lowerVolume()
+    # await raiseVolume()
+    await asyncio.gather(
+        lowerVolume(),
+        raiseVolume()
+    )
+# lowerVolume()
+# raiseVolume()
+asyncio.run(main())
