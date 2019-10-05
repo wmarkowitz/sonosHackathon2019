@@ -4,3 +4,8 @@ AT+CIPSTART="TCP","webhook.site",80
 AT+CIPSEND=54
 GET /588c8963-21d7-479b-9f27-3b5906319e31 HTTP/1.0
 AT+CIPCLOSE
+
+AT+CIPSTART="TCP","api.ws.sonos.com",80
+AT+CIPSEND=43
+GET /control/api/v1/households HTTP/1.0
+AT+CIPCLOSE
