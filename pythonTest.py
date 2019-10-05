@@ -1,6 +1,7 @@
 import requests
 import json
 import asyncio
+import numpy as np
 bedroom = "RINCON_7828CAE736E601400"
 bathroom = "RINCON_7828CAF4D45E01400"
 # bathroom
@@ -38,7 +39,6 @@ async def raiseVolume():
         'Postman-Token': "e19dae15-21d0-499f-94e5-559953e6bb31"
         }
     response = requests.request("POST", url, data=body, headers=headers)
-    print(response.text)
     return(response.text)
 
 async def raiseRelativeVolume(volDelta, id):
@@ -55,7 +55,6 @@ async def raiseRelativeVolume(volDelta, id):
         'Postman-Token': "e19dae15-21d0-499f-94e5-559953e6bb31"
         }
     response = requests.request("POST", url, data=body, headers=headers)
-    print(response.text)
     return(response.text)
 
 
@@ -74,8 +73,8 @@ def getVolume(id):
         'Postman-Token': "d081d504-024b-42f4-9539-7faa95bc6f1c"
         }
 
-    response = requests.request("GET", url, data=payload, headers=headers)
 
+    response = requests.request("GET", url, data=payload, headers=headers)
     print(response.text)
     return(response.text)
 
@@ -89,11 +88,28 @@ async def main():
     #     lowerVolume(),
     #     raiseVolume()
     # )
-    targetVolBathroom = 6
-    targetVolBedroom = 6
+    targetVolBathroom = 0
+    targetVolBedroom = 50
+    incrementSize = 2
+    currentVolumeBedroom = json.loads(getVolume(bedroom))
+    currentVolumeBathroom = json.loads(getVolume(bathroom))
+    rangeTotal = targetVolBedroom - currentVolumeBedroom["volume"]
+    rangeTotalBathroom = targetVolBathroom - currentVolumeBathroom["volume"]
+    numFullIncrementsBedroom = rangeTotal//incrementSize
+    numFullIncrementsBathroom = rangeTotalBathroom//incrementSize
+    sign = int(np.sign(rangeTotal))
+    signBath = int(np.sign(rangeTotalBathroom))
+
+
+
+
+    currentVolumeBathroom = getVolume(bathroom)
     await asyncio.gather(
-        *[raiseRelativeVolume(5, bathroom) for _ in range(0,targetVolBathroom)],
-        *[raiseRelativeVolume(-5, bedroom) for _ in range(0,targetVolBedroom)],
+        *[raiseRelativeVolume(signBath*incrementSize, bathroom) for _ in range(0,abs(numFullIncrementsBathroom))],
+        raiseRelativeVolume(rangeTotalBathroom%incrementSize, bathroom),
+        *[raiseRelativeVolume(sign*incrementSize, bedroom) for _ in range(0,abs(numFullIncrementsBedroom))],
+        raiseRelativeVolume(rangeTotal%incrementSize, bathroom)
+
     )
 
 
