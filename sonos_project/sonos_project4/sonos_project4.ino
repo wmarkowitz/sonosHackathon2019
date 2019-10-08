@@ -8,12 +8,14 @@
 #define PIR 4
 
 // const char*
-String NETSSID = "<SSID>";         // The SSID (name) of the Wi-Fi network you want to connect to
-String NETPASS = "<PASS>";     // The password of the Wi-Fi network
+String NETSSID = "Samsung Galaxy S7 edge 7498";         // The SSID (name) of the Wi-Fi network you want to connect to
+String NETPASS = "georgem!";     // The password of the Wi-Fi network
 
-String ACCESS_TOKEN = "<ACCESS_TOKEN>";
-String API_KEY = "<API_KEY>";
-String PLAYER = "<PLAYER>";
+String ACCESS_TOKEN = "f86d09a5-f0d2-40a2-a525-db690c438105";
+String API_KEY = "536e8328-d836-476b-8035-fd206794c9b7";
+String PLAYER = "RINCON_7828CAF4D45E01400";
+
+long NUDGE = 5000;
 
 // api.ws.sonos.com SSL fingerprint. Expires 3/16/2020.
 const uint8_t SONOS_API_FINGERPRINT[20] = {0x21, 0x38, 0xBA, 0xA9, 0xB8, 0x82, 0x0B, 0x7D, 0x56, 0xA2, 0x4A, 0x9C, 0x05, 0x3A, 0xC7, 0xA8, 0x2D, 0x2F, 0xED, 0x7F};
@@ -32,7 +34,7 @@ void setup() {
   delay(10);
   Serial.println('\n');
 
-  Serial.println("Welcome to THAONOS v0.0.1");
+  Serial.println("Welcome to THANOS v0.0.1");
   Serial.println("-------------------------");
   
   WiFi.begin(NETSSID, NETPASS);             // Connect to the network
@@ -51,11 +53,14 @@ void setup() {
 }
 
 bool activated = false;
+bool nudge = false;
+long last_active = 0;
 void loop() {
   int pir_val = digitalRead(PIR);
   
   if(pir_val == HIGH && !activated) {
     activated = true;
+    nudge = false;
     Serial.println("\n===== MOTION DETECTED =====");
     Serial.println("Activating speaker.");
 
@@ -63,8 +68,20 @@ void loop() {
     setVolume(50);    
   } else if (pir_val == LOW && activated) {
     activated = false;
-    Serial.println("\n===== TIMEOUT =====");
-    Serial.println("Deactivating speaker.");
+    nudge = true;
+    last_active = millis();
+
+    Serial.println("\n===== NO ACTIVITY - NUDGE =====");
+    Serial.println("Lowering volume.");
+
+    digitalWrite(LED, LOW);
+    setVolume(25);
+
+  } else if (pir_val == LOW && nudge && millis() - last_active > NUDGE) {
+    nudge = false;
+    
+    Serial.println("\n===== ACTIVITY TIMEOUT =====");
+    Serial.println("Fully deactivating speaker.");
 
     digitalWrite(LED, LOW);
     setVolume(0);
@@ -74,7 +91,7 @@ void loop() {
 }
 
 bool setVolume(int volume) {
-  Serial.println("[THAONOS] Set volume to " + String(volume) + "%");
+  Serial.println("[THANOS] Set volume to " + String(volume) + "%");
 
   header_t http_header_names[] = {
     {"Authorization", "Bearer " + ACCESS_TOKEN},
@@ -114,7 +131,7 @@ bool httpGet(String url, const uint8_t fingerprint[20], header_t header_list[], 
     // httpCode will be negative on error
     if (httpCode > 0) {
       // HTTP header has been send and Server response header has been handled
-      Serial.printf("[HTTPS] GET: Success: %d\n", httpCode);
+      Serial.printf("[HTTPS] GET: Status: %d\n", httpCode);
 
       // file found at server
       if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
@@ -159,7 +176,7 @@ bool httpPost(String url, const uint8_t fingerprint[20], header_t header_list[],
     // httpCode will be negative on error
     if (httpCode > 0) {
       // HTTP header has been send and Server response header has been handled
-      Serial.printf("[HTTPS] POST: Success: %d\n", httpCode);
+      Serial.printf("[HTTPS] POST: Status: %d\n", httpCode);
 
       // file found at server
       if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
